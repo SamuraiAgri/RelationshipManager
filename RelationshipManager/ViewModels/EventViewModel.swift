@@ -86,6 +86,15 @@ class EventViewModel: ObservableObject {
         filterEvents()
     }
     
+    // EventViewModelに追加するメソッド
+    func getEventsForDay(date: Date) -> [EventEntity] {
+        let calendar = Calendar.current
+        return events.filter { event in
+            guard let eventDate = event.startDate else { return false }
+            return calendar.isDate(eventDate, inSameDayAs: date)
+        }
+    }
+    
     // 新しいイベントを追加
     func addEvent(title: String, details: String?, startDate: Date, endDate: Date?, isAllDay: Bool,
                  location: String?, reminder: Bool, reminderDate: Date?, contacts: [ContactEntity], group: GroupEntity? = nil) -> EventEntity {

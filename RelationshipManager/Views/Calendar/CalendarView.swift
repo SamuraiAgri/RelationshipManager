@@ -1,5 +1,3 @@
-
-// CalendarView.swift
 import SwiftUI
 
 struct CalendarView: View {
@@ -55,6 +53,45 @@ struct CalendarView: View {
                     }) {
                         Image(systemName: "chevron.right")
                             .foregroundColor(AppColors.primary)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 10)
+                
+                // カレンダー表示（仮実装）
+                Text("カレンダーコンテンツ（開発中）")
+                    .font(AppFonts.headline)
+                    .padding(.vertical, 50)
+                
+                Divider()
+                
+                // 選択日のイベント一覧
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(formatSelectedDate())
+                        .font(AppFonts.headline)
+                        .padding(.horizontal)
+                        .padding(.top, 10)
+                    
+                    if viewModel.filteredEvents.isEmpty {
+                        VStack {
+                            Spacer()
+                            Text("予定はありません")
+                                .font(AppFonts.body)
+                                .foregroundColor(AppColors.textSecondary)
+                                .padding()
+                            Spacer()
+                        }
+                        .frame(maxHeight: 200)
+                    } else {
+                        List {
+                            ForEach(viewModel.filteredEvents) { event in
+                                NavigationLink(destination: EventDetailView(event: event)) {
+                                    EventRowView(event: event)
+                                }
+                            }
+                        }
+                        .listStyle(PlainListStyle())
+                        .frame(maxHeight: 300)
                     }
                 }
             }
@@ -162,68 +199,49 @@ struct CalendarView: View {
         }
     }
 }
-                .padding(.horizontal)
-                .padding(.bottom, 10)
-                
-                // カレンダー表示
-                switch calendarMode {
-                case .month:
-                    MonthCalendarView(
-                        selectedDate: $selectedDate,
-                        events: viewModel.events,
-                        onDateSelected: { date in
-                            selectedDate = date
-                            viewModel.setSelectedDate(date)
-                        }
-                    )
-                case .week:
-                    WeekCalendarView(
-                        selectedDate: $selectedDate,
-                        events: viewModel.events,
-                        onDateSelected: { date in
-                            selectedDate = date
-                            viewModel.setSelectedDate(date)
-                        }
-                    )
-                case .day:
-                    DayCalendarView(
-                        selectedDate: $selectedDate,
-                        events: viewModel.getEventsForDay(date: selectedDate),
-                        onDateSelected: { date in
-                            selectedDate = date
-                            viewModel.setSelectedDate(date)
-                        }
-                    )
-                }
-                
-                Divider()
-                
-                // 選択日のイベント一覧
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(formatSelectedDate())
-                        .font(AppFonts.headline)
-                        .padding(.horizontal)
-                        .padding(.top, 10)
-                    
-                    if viewModel.filteredEvents.isEmpty {
-                        VStack {
-                            Spacer()
-                            Text("予定はありません")
-                                .font(AppFonts.body)
-                                .foregroundColor(AppColors.textSecondary)
-                                .padding()
-                            Spacer()
-                        }
-                        .frame(maxHeight: 200)
-                    } else {
-                        List {
-                            ForEach(viewModel.filteredEvents) { event in
-                                NavigationLink(destination: EventDetailView(event: event)) {
-                                    EventRowView(event: event)
-                                }
-                            }
-                        }
-                        .listStyle(PlainListStyle())
-                        .frame(maxHeight: 300)
-                    }
-                }
+
+// カレンダー月ビュー（仮）
+struct MonthCalendarView: View {
+    @Binding var selectedDate: Date
+    var events: [EventEntity]
+    var onDateSelected: (Date) -> Void
+    
+    var body: some View {
+        Text("月カレンダー（開発中）")
+            .padding()
+    }
+}
+
+// カレンダー週ビュー（仮）
+struct WeekCalendarView: View {
+    @Binding var selectedDate: Date
+    var events: [EventEntity]
+    var onDateSelected: (Date) -> Void
+    
+    var body: some View {
+        Text("週カレンダー（開発中）")
+            .padding()
+    }
+}
+
+// カレンダー日ビュー（仮）
+struct DayCalendarView: View {
+    @Binding var selectedDate: Date
+    var events: [EventEntity]
+    var onDateSelected: (Date) -> Void
+    
+    var body: some View {
+        Text("日カレンダー（開発中）")
+            .padding()
+    }
+}
+
+// EventViewModel の拡張（一時的なもの）
+extension EventViewModel {
+    func getEventsForDay(date: Date) -> [EventEntity] {
+        return events.filter { event in
+            guard let eventDate = event.startDate else { return false }
+            return Calendar.current.isDate(eventDate, inSameDayAs: date)
+        }
+    }
+}

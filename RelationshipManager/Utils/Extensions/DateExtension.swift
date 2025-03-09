@@ -65,6 +65,13 @@ extension Date {
         return formatter.localizedString(for: self, relativeTo: Date())
     }
     
+    // 日付をMM-DD形式の文字列に変換するメソッド
+    func toMMDD() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM-dd"
+        return formatter.string(from: self)
+    }
+    
     // 誕生日から年齢を計算
     func age() -> Int? {
         return Calendar.current.dateComponents([.year], from: self, to: Date()).year

@@ -1,4 +1,3 @@
-
 import Foundation
 
 struct AppConstants {
@@ -36,3 +35,44 @@ struct AppConstants {
             }
         }
     }
+    
+    // コミュニケーションタイプの定義
+    enum CommunicationType: String, CaseIterable, Identifiable {
+        case call = "Call"
+        case email = "Email"
+        case meeting = "Meeting"
+        case message = "Message"
+        
+        var id: String { self.rawValue }
+        
+        var displayName: String {
+            switch self {
+            case .call:
+                return "通話"
+            case .email:
+                return "メール"
+            case .meeting:
+                return "会議"
+            case .message:
+                return "メッセージ"
+            }
+        }
+    }
+    
+    // カテゴリの定義
+    enum Category: String, CaseIterable, Identifiable {
+        case business = "Business"
+        case `private` = "Private"
+        
+        var id: String { self.rawValue }
+        
+        var displayName: String {
+            switch self {
+            case .business:
+                return "仕事"
+            case .private:
+                return "プライベート"
+            }
+        }
+    }
+}

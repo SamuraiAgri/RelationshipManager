@@ -5,6 +5,7 @@ struct PersistenceController {
     static let shared = PersistenceController()
     
     // プレビュー用のインスタンス
+    @MainActor
     static var preview: PersistenceController = {
         let controller = PersistenceController(inMemory: true)
         // プレビュー用にサンプルデータを作成
@@ -62,6 +63,12 @@ struct PersistenceController {
         group1.addToContacts(contact1)
         group1.createdAt = Date()
         group1.updatedAt = Date()
+        
+        // テンプレートアイテム作成（古いコード互換用）
+        for _ in 0..<10 {
+            let newItem = Item(context: viewContext)
+            newItem.timestamp = Date()
+        }
         
         do {
             try viewContext.save()
