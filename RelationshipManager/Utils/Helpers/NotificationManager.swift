@@ -1,3 +1,5 @@
+
+
 // NotificationManager.swift
 import Foundation
 import UserNotifications
@@ -45,7 +47,9 @@ class NotificationManager {
         }
         
         content.sound = .default
-        content.userInfo = ["eventID": event.id?.uuidString ?? ""]
+        if let id = event.id?.uuidString {
+            content.userInfo = ["eventID": id]
+        }
         
         // 通知トリガーの作成
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: reminderDate)
