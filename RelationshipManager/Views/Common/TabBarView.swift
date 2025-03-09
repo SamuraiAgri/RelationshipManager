@@ -38,9 +38,7 @@ struct TabBarView: View {
     }
 }
 
-struct TabBarView_Previews: PreviewProvider {
-    static var previews: some View {
-        TabBarView()
-            .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-    }
+#Preview {
+    TabBarView()
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
