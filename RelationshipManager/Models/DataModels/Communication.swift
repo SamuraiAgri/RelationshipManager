@@ -1,25 +1,24 @@
-
 import Foundation
 import SwiftUI
 
 extension CommunicationEntity {
-    var typeEnum: AppConstants.CommunicationType? {
-        return AppConstants.CommunicationType(rawValue: type)
+    var typeEnum: CommunicationType? {
+        return CommunicationType(rawValue: type ?? "")
     }
     
     var typeDisplayName: String {
-        return typeEnum?.displayName ?? type
+        return typeEnum?.displayName ?? type ?? ""
     }
     
     var typeColor: Color {
         switch type {
-        case AppConstants.CommunicationType.call.rawValue:
+        case CommunicationType.call.rawValue:
             return AppColors.callType
-        case AppConstants.CommunicationType.email.rawValue:
+        case CommunicationType.email.rawValue:
             return AppColors.emailType
-        case AppConstants.CommunicationType.meeting.rawValue:
+        case CommunicationType.meeting.rawValue:
             return AppColors.meetingType
-        case AppConstants.CommunicationType.message.rawValue:
+        case CommunicationType.message.rawValue:
             return AppColors.messageType
         default:
             return AppColors.primary
@@ -28,13 +27,13 @@ extension CommunicationEntity {
     
     var typeIconName: String {
         switch type {
-        case AppConstants.CommunicationType.call.rawValue:
+        case CommunicationType.call.rawValue:
             return "phone"
-        case AppConstants.CommunicationType.email.rawValue:
+        case CommunicationType.email.rawValue:
             return "envelope"
-        case AppConstants.CommunicationType.meeting.rawValue:
+        case CommunicationType.meeting.rawValue:
             return "person.2"
-        case AppConstants.CommunicationType.message.rawValue:
+        case CommunicationType.message.rawValue:
             return "message"
         default:
             return "circle"
@@ -42,21 +41,45 @@ extension CommunicationEntity {
     }
     
     var formattedDate: String {
-        return date.formatted(style: .medium)
+        return date?.formatted(date: .medium, time: .none) ?? ""
     }
     
     var formattedTime: String {
-        return date.formattedTime(style: .short)
+        return date?.formattedTime(style: .short) ?? ""
     }
     
     var relativeTimeString: String {
-        return date.relativeFormatted
+        return date?.relativeFormatted ?? ""
     }
     
     var daysSinceNow: Int {
+        guard let date = date else { return 0 }
         let calendar = Calendar.current
         let now = Date()
         let components = calendar.dateComponents([.day], from: date, to: now)
         return components.day ?? 0
+    }
+}
+
+// コミュニケーションタイプの定義
+enum CommunicationType: String, CaseIterable, Identifiable {
+    case call = "Call"
+    case email = "Email"
+    case meeting = "Meeting"
+    case message = "Message"
+    
+    var id: String { self.rawValue }
+    
+    var displayName: String {
+        switch self {
+        case .call:
+            return "通話"
+        case .email:
+            return "メール"
+        case .meeting:
+            return "会議"
+        case .message:
+            return "メッセージ"
+        }
     }
 }

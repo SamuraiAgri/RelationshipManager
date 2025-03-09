@@ -1,4 +1,3 @@
-
 import Foundation
 import SwiftUI
 
@@ -10,12 +9,12 @@ extension GroupEntity {
     
     var eventsArray: [EventEntity] {
         let set = events as? Set<EventEntity> ?? []
-        return set.sorted { $0.startDate < $1.startDate }
+        return set.sorted { ($0.startDate ?? Date()) < ($1.startDate ?? Date()) }
     }
     
     var upcomingEvents: [EventEntity] {
         let now = Date()
-        return eventsArray.filter { $0.startDate > now }
+        return eventsArray.filter { ($0.startDate ?? Date()) > now }
     }
     
     var memberCount: Int {
@@ -27,14 +26,14 @@ extension GroupEntity {
     }
     
     var categoryColor: Color {
-        return category == AppConstants.Category.business.rawValue ? AppColors.businessCategory : AppColors.privateCategory
+        return category == Category.business.rawValue ? AppColors.businessCategory : AppColors.privateCategory
     }
     
     var categoryDisplayName: String {
-        if category == AppConstants.Category.business.rawValue {
-            return AppConstants.Category.business.displayName
+        if category == Category.business.rawValue {
+            return Category.business.displayName
         } else {
-            return AppConstants.Category.private.displayName
+            return Category.private.displayName
         }
     }
     

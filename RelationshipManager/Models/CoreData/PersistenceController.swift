@@ -1,4 +1,3 @@
-
 import CoreData
 
 struct PersistenceController {
@@ -50,7 +49,7 @@ struct PersistenceController {
         event1.startDate = Calendar.current.date(byAdding: .day, value: 2, to: Date())!
         event1.isAllDay = false
         event1.reminder = true
-        event1.reminderDate = Calendar.current.date(byAdding: .hour, value: -1, to: event1.startDate)
+        event1.reminderDate = Calendar.current.date(byAdding: .hour, value: -1, to: event1.startDate!)
         event1.addToContacts(contact1)
         event1.createdAt = Date()
         event1.updatedAt = Date()

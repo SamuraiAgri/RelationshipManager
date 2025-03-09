@@ -1,16 +1,15 @@
-
 import Foundation
 import CoreData
 import UIKit
 
 extension ContactEntity {
     var fullName: String {
-        return "\(firstName) \(lastName)"
+        return "\(firstName ?? "") \(lastName ?? "")"
     }
     
     var initials: String {
-        let firstInitial = firstName.prefix(1).uppercased()
-        let lastInitial = lastName.prefix(1).uppercased()
+        let firstInitial = (firstName ?? "").prefix(1).uppercased()
+        let lastInitial = (lastName ?? "").prefix(1).uppercased()
         return "\(firstInitial)\(lastInitial)"
     }
     
@@ -27,34 +26,51 @@ extension ContactEntity {
     }
     
     var sortableName: String {
-        return "\(lastName)\(firstName)"
+        return "\(lastName ?? "")\(firstName ?? "")"
     }
     
     var communicationsArray: [CommunicationEntity] {
         let set = communications as? Set<CommunicationEntity> ?? []
-        return set.sorted { $0.date > $1.date }
+        return set.sorted { ($0.date ?? Date()) > ($1.date ?? Date()) }
     }
     
     var eventsArray: [EventEntity] {
         let set = events as? Set<EventEntity> ?? []
-        return set.sorted { $0.startDate < $1.startDate }
+        return set.sorted { ($0.startDate ?? Date()) < ($1.startDate ?? Date()) }
     }
     
     var groupsArray: [GroupEntity] {
         let set = groups as? Set<GroupEntity> ?? []
-        return set.sorted { $0.name < $1.name }
+        return set.sorted { ($0.name ?? "") < ($1.name ?? "") }
     }
     
     var upcomingEvents: [EventEntity] {
         let now = Date()
-        return eventsArray.filter { $0.startDate > now }
+        return eventsArray.filter { ($0.startDate ?? Date()) > now }
     }
     
     var isPrimaryBusiness: Bool {
-        return category == AppConstants.Category.business.rawValue
+        return category == Category.business.rawValue
     }
     
     func addProfileImage(_ image: UIImage, compression: CGFloat = 0.7) {
         profileImageData = image.jpegData(compressionQuality: compression)
+    }
+}
+
+// カテゴリの定義
+enum Category: String, CaseIterable, Identifiable {
+    case business = "Business"
+    case `private` = "Private"
+    
+    var id: String { self.rawValue }
+    
+    var displayName: String {
+        switch self {
+        case .business:
+            return "仕事"
+        case .private:
+            return "プライベート"
+        }
     }
 }

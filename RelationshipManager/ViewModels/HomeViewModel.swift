@@ -1,4 +1,3 @@
-
 import Foundation
 import CoreData
 import SwiftUI
@@ -87,10 +86,20 @@ class HomeViewModel: ObservableObject {
         let calendar = Calendar.current
         let today = Date()
         
-        let monthPredicate = NSPredicate(format: "MONTH(birthday) == %d", calendar.component(.month, from: today))
-        let dayPredicate = NSPredicate(format: "DAY(birthday) == %d", calendar.component(.day, from: today))
+        // 月と日に基づいて誕生日をフィルタリング
+        let dayFormat = DateFormatter()
+        dayFormat.dateFormat = "dd"
+        let dayString = dayFormat.string(from: today)
         
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [monthPredicate, dayPredicate])
+        let monthFormat = DateFormatter()
+        monthFormat.dateFormat = "MM"
+        let monthString = monthFormat.string(from: today)
+        
+        // 文字列比較で月と日を一致させる
+        let predicate = NSPredicate(
+            format: "birthday != nil AND SUBSTRING(birthday, 6, 2) = %@ AND SUBSTRING(birthday, 9, 2) = %@",
+            monthString, dayString
+        )
         request.predicate = predicate
         
         // 名前順でソート
@@ -100,6 +109,7 @@ class HomeViewModel: ObservableObject {
             todaysBirthdays = try viewContext.fetch(request)
         } catch {
             print("誕生日の取得に失敗しました: \(error.localizedDescription)")
+            todaysBirthdays = [] // エラー時は空配列を設定
         }
     }
     
@@ -119,6 +129,7 @@ class HomeViewModel: ObservableObject {
             reminderCount = todayEvents.count
         } catch {
             print("リマインダーの取得に失敗しました: \(error.localizedDescription)")
+            reminderCount = 0 // エラー時は0を設定
         }
     }
     
@@ -128,7 +139,8 @@ class HomeViewModel: ObservableObject {
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
         
         return upcomingEvents.filter { event in
-            return event.startDate >= today && event.startDate < tomorrow
+            guard let date = event.startDate else { return false }
+            return date >= today && date < tomorrow
         }
     }
     
@@ -139,7 +151,8 @@ class HomeViewModel: ObservableObject {
         let nextWeek = calendar.date(byAdding: .day, value: 7, to: today)!
         
         return upcomingEvents.filter { event in
-            return event.startDate >= today && event.startDate < nextWeek
+            guard let date = event.startDate else { return false }
+            return date >= today && date < nextWeek
         }
     }
     
@@ -152,16 +165,18 @@ class HomeViewModel: ObservableObject {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         
-        // 今年の誕生日
-        let birthdayMonth = calendar.component(.month, from: birthday)
-        let birthdayDay = calendar.component(.day, from: birthday)
-        let todayYear = calendar.component(.year, from: today)
+        // 誕生日から月と日を取り出す
+        let birthdayComponents = calendar.dateComponents([.month, .day], from: birthday)
+        let birthdayMonth = birthdayComponents.month ?? 1
+        let birthdayDay = birthdayComponents.day ?? 1
         
-        var birthdayThisYear = calendar.date(from: DateComponents(year: todayYear, month: birthdayMonth, day: birthdayDay))!
+        // 今年の誕生日を計算
+        let currentYear = calendar.component(.year, from: today)
+        var birthdayThisYear = calendar.date(from: DateComponents(year: currentYear, month: birthdayMonth, day: birthdayDay)) ?? today
         
         // 今年の誕生日がすでに過ぎている場合は来年の誕生日を計算
         if birthdayThisYear < today {
-            birthdayThisYear = calendar.date(from: DateComponents(year: todayYear + 1, month: birthdayMonth, day: birthdayDay))!
+            birthdayThisYear = calendar.date(from: DateComponents(year: currentYear + 1, month: birthdayMonth, day: birthdayDay)) ?? today
         }
         
         let daysUntilBirthday = calendar.dateComponents([.day], from: today, to: birthdayThisYear).day
@@ -174,6 +189,8 @@ class HomeViewModel: ObservableObject {
             return nil
         }
         
-        return birthday.age()
+        let calendar = Calendar.current
+        let ageComponents = calendar.dateComponents([.year], from: birthday, to: Date())
+        return ageComponents.year
     }
 }

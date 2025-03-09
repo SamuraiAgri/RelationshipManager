@@ -1,4 +1,3 @@
-
 import Foundation
 import SwiftUI
 
@@ -20,7 +19,7 @@ extension EventEntity {
     }
     
     var durationInMinutes: Int {
-        guard let endDate = endDate else { return 60 }  // デフォルト1時間
+        guard let startDate = startDate, let endDate = endDate else { return 60 }  // デフォルト1時間
         return Calendar.current.dateComponents([.minute], from: startDate, to: endDate).minute ?? 60
     }
     
@@ -45,33 +44,38 @@ extension EventEntity {
     }
     
     var formattedStartDate: String {
-        return startDate.formatted(style: .medium)
+        return startDate?.formatted(date: .medium, time: .none) ?? ""
     }
     
     var formattedStartTime: String {
         if isAllDay {
             return "終日"
         }
-        return startDate.formattedTime(style: .short)
+        return startDate?.formattedTime(style: .short) ?? ""
     }
     
     var isUpcoming: Bool {
+        guard let startDate = startDate else { return false }
         return startDate > Date()
     }
     
     var isPast: Bool {
+        guard let startDate = startDate else { return false }
         return startDate < Date()
     }
     
     var isToday: Bool {
-        return startDate.isToday
+        guard let startDate = startDate else { return false }
+        return Calendar.current.isDateInToday(startDate)
     }
     
     var dayOfMonth: Int {
+        guard let startDate = startDate else { return 1 }
         return Calendar.current.component(.day, from: startDate)
     }
     
     var monthString: String {
+        guard let startDate = startDate else { return "" }
         let formatter = DateFormatter()
         formatter.dateFormat = "M月"
         formatter.locale = Locale(identifier: "ja_JP")
@@ -79,6 +83,7 @@ extension EventEntity {
     }
     
     var weekdayString: String {
+        guard let startDate = startDate else { return "" }
         let formatter = DateFormatter()
         formatter.dateFormat = "E"
         formatter.locale = Locale(identifier: "ja_JP")
@@ -93,5 +98,52 @@ extension EventEntity {
     
     func cancelReminder() {
         NotificationManager.shared.removeEventNotification(for: self)
+    }
+}
+
+// Date拡張メソッド
+extension Date {
+    func formatted(date: DateFormatter.Style, time: DateFormatter.Style) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = date
+        formatter.timeStyle = time
+        formatter.locale = Locale(identifier: "ja_JP")
+        return formatter.string(from: self)
+    }
+    
+    func formattedTime(style: DateFormatter.Style) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = style
+        formatter.locale = Locale(identifier: "ja_JP")
+        return formatter.string(from: self)
+    }
+    
+    var relativeFormatted: String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        formatter.locale = Locale(identifier: "ja_JP")
+        return formatter.localizedString(for: self, relativeTo: Date())
+    }
+    
+    var isToday: Bool {
+        return Calendar.current.isDateInToday(self)
+    }
+}
+
+// NotificationManager クラス（シンプルな実装）
+class NotificationManager {
+    static let shared = NotificationManager()
+    
+    private init() {}
+    
+    func scheduleEventNotification(for event: EventEntity) {
+        // 実装は省略
+        print("通知をスケジュール: \(event.title ?? "無題のイベント")")
+    }
+    
+    func removeEventNotification(for event: EventEntity) {
+        // 実装は省略
+        print("通知を削除: \(event.title ?? "無題のイベント")")
     }
 }
