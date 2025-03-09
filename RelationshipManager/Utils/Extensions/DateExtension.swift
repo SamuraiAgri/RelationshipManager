@@ -26,13 +26,22 @@ extension Date {
         return self >= weekStartDate && self < weekEndDate
     }
     
-    // 日付のフォーマット
+    // 日付のフォーマット(style指定)
     func formatted(style: DateFormatter.Style = .medium) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = style
         formatter.timeStyle = .none
         formatter.locale = Locale(identifier: "ja_JP")
         
+        return formatter.string(from: self)
+    }
+    
+    // 日付と時刻のフォーマット(両方のスタイル指定)
+    func formatted(date: DateFormatter.Style, time: DateFormatter.Style) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = date
+        formatter.timeStyle = time
+        formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: self)
     }
     

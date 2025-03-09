@@ -1,6 +1,7 @@
 // NotificationManager.swift
 import Foundation
 import UserNotifications
+import CoreData
 
 class NotificationManager {
     static let shared = NotificationManager()
