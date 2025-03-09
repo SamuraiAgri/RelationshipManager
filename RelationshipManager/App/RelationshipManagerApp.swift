@@ -1,4 +1,4 @@
-// RelationshipManagerApp.swift
+// RelationshipManager/App/RelationshipManagerApp.swift
 import SwiftUI
 
 @main

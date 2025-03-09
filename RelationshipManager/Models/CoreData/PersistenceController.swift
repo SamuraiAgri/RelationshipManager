@@ -36,6 +36,7 @@ struct PersistenceController {
     
     // イニシャライザ
     init(inMemory: Bool = false) {
+        // 正しいデータモデル名を指定
         container = NSPersistentContainer(name: "RelationshipManager")
         
         if inMemory {
@@ -44,17 +45,6 @@ struct PersistenceController {
         
         container.loadPersistentStores { (storeDescription, error) in
             if let error = error as NSError? {
-                // エラーハンドリング
-                /*
-                 エラーの理由:
-                 * Coreデータストアが見つからない場合
-                 * スキーマの互換性がない場合
-                 * その他のエラー
-                 
-                 エラーが発生した場合の対応方法:
-                 * 開発中のエラー: アプリを終了してデータを再作成する
-                 * 実環境: 移行処理などの対策を行う
-                 */
                 fatalError("Core Data store failed to load: \(error), \(error.userInfo)")
             }
         }
