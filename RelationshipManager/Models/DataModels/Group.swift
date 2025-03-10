@@ -37,7 +37,8 @@ extension GroupEntity {
         }
     }
     
-    var description: String? {
+    // この部分を修正 - 名前を'description'から'groupDescription'に変更し、競合を避ける
+    var groupDescription: String? {
         return descriptionText
     }
     
