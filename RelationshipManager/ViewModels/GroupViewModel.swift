@@ -65,7 +65,7 @@ class GroupViewModel: ObservableObject {
         let newGroup = GroupEntity(context: viewContext)
         newGroup.id = UUID()
         newGroup.name = name
-        newGroup.description = description
+        newGroup.descriptionText = description
         newGroup.category = category
         newGroup.createdAt = Date()
         newGroup.updatedAt = Date()
@@ -79,7 +79,7 @@ class GroupViewModel: ObservableObject {
     // グループを更新
     func updateGroup(_ group: GroupEntity, name: String, description: String?, category: String) {
         group.name = name
-        group.description = description
+        group.descriptionText = description
         group.category = category
         group.updatedAt = Date()
         

@@ -4,7 +4,9 @@ import UIKit
 
 extension ContactEntity {
     var fullName: String {
-        return "\(firstName ?? "") \(lastName ?? "")"
+        let first = firstName ?? ""
+        let last = lastName ?? ""
+        return "\(first) \(last)".trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     var initials: String {
@@ -26,7 +28,9 @@ extension ContactEntity {
     }
     
     var sortableName: String {
-        return "\(lastName ?? "")\(firstName ?? "")"
+        let last = lastName ?? ""
+        let first = firstName ?? ""
+        return "\(last)\(first)"
     }
     
     var communicationsArray: [CommunicationEntity] {

@@ -1,4 +1,3 @@
-
 import Foundation
 import CoreData
 import SwiftUI
@@ -40,7 +39,11 @@ class ContactViewModel: ObservableObject {
             
             // 検索テキストフィルタ
             if !searchText.isEmpty {
-                let searchableText = "\(contact.firstName) \(contact.lastName) \(contact.email ?? "") \(contact.phoneNumber ?? "")"
+                let firstName = contact.firstName ?? ""
+                let lastName = contact.lastName ?? ""
+                let email = contact.email ?? ""
+                let phoneNumber = contact.phoneNumber ?? ""
+                let searchableText = "\(firstName) \(lastName) \(email) \(phoneNumber)"
                 return searchableText.lowercased().contains(searchText.lowercased())
             }
             
@@ -153,7 +156,9 @@ class ContactViewModel: ObservableObject {
     
     // 連絡先の完全な名前を取得
     func getFullName(for contact: ContactEntity) -> String {
-        return "\(contact.firstName) \(contact.lastName)"
+        let firstName = contact.firstName ?? ""
+        let lastName = contact.lastName ?? ""
+        return "\(firstName) \(lastName)"
     }
     
     // カテゴリに基づいて色を取得
@@ -167,8 +172,12 @@ class ContactViewModel: ObservableObject {
     
     // 連絡先のイニシャルを取得
     func getInitials(for contact: ContactEntity) -> String {
-        let firstInitial = contact.firstName.prefix(1).uppercased()
-        let lastInitial = contact.lastName.prefix(1).uppercased()
+        let firstName = contact.firstName ?? ""
+        let lastName = contact.lastName ?? ""
+        
+        let firstInitial = firstName.isEmpty ? "" : String(firstName.prefix(1)).uppercased()
+        let lastInitial = lastName.isEmpty ? "" : String(lastName.prefix(1)).uppercased()
+        
         return "\(firstInitial)\(lastInitial)"
     }
 }

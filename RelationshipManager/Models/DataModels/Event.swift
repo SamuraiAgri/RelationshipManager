@@ -4,7 +4,7 @@ import SwiftUI
 extension EventEntity {
     var contactsArray: [ContactEntity] {
         let set = contacts as? Set<ContactEntity> ?? []
-        return set.sorted { $0.sortableName < $1.sortableName }
+        return set.sorted { ($0.sortableName) < ($1.sortableName) }
     }
     
     var contactNames: String {

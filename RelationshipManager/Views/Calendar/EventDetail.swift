@@ -23,7 +23,7 @@ struct EventDetailView: View {
             VStack(spacing: 20) {
                 // イベントヘッダー
                 VStack(spacing: 10) {
-                    Text(event.title)
+                    Text(event.title ?? "無題")
                         .font(AppFonts.title2)
                         .multilineTextAlignment(.center)
                         .padding(.top)
@@ -181,7 +181,9 @@ struct EventDetailView: View {
                 
                 // アクションボタン
                 HStack(spacing: 20) {
-                    if let calendar = Calendar.current.date(byAdding: .minute, value: -10, to: event.startDate), calendar > Date() {
+                    if let startDate = event.startDate,
+                       let calendar = Calendar.current.date(byAdding: .minute, value: -10, to: startDate),
+                       calendar > Date() {
                         Button(action: {
                             addToCalendar()
                         }) {

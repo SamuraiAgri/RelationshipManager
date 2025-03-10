@@ -49,13 +49,17 @@ class EventViewModel: ObservableObject {
         filteredEvents = events.filter { event in
             // 選択された日付でフィルタリング
             let calendar = Calendar.current
-            if let eventStartDate = event.startDate, !calendar.isDate(eventStartDate, inSameDayAs: selectedDate) {
+            guard let eventStartDate = event.startDate else { return false }
+            
+            if !calendar.isDate(eventStartDate, inSameDayAs: selectedDate) {
                 return false
             }
             
             // 検索テキストでフィルタリング
             if !searchText.isEmpty {
-                let searchableText = "\(event.title ?? "") \(event.details ?? "")"
+                let title = event.title ?? ""
+                let details = event.details ?? ""
+                let searchableText = "\(title) \(details)"
                 return searchableText.lowercased().contains(searchText.lowercased())
             }
             
@@ -246,8 +250,8 @@ class EventViewModel: ObservableObject {
     func getEventsForMonth(month: Date) -> [EventEntity] {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month], from: month)
-        let startOfMonth = calendar.date(from: components)!
-        let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
+        guard let startOfMonth = calendar.date(from: components) else { return [] }
+        guard let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth) else { return [] }
         
         return events.filter { event in
             guard let startDate = event.startDate else { return false }

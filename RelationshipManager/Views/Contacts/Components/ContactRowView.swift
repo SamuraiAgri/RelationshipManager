@@ -13,15 +13,22 @@ struct ContactRowView: View {
                     .font(.system(size: 22))
             }
             
+            // イニシャルを安全に取得する
+            let firstName = contact.firstName ?? ""
+            let lastName = contact.lastName ?? ""
+            let firstInitial = firstName.isEmpty ? "" : String(firstName.prefix(1))
+            let lastInitial = lastName.isEmpty ? "" : String(lastName.prefix(1))
+            let initials = "\(firstInitial)\(lastInitial)"
+            
             AvatarView(
                 imageData: contact.profileImageData,
-                initials: "\((contact.firstName ?? "").prefix(1))\((contact.lastName ?? "").prefix(1))",
+                initials: initials,
                 size: 50,
                 backgroundColor: contact.category == AppConstants.Category.business.rawValue ? AppColors.businessCategory : AppColors.privateCategory
             )
             
             VStack(alignment: .leading, spacing: 4) {
-                Text("\(contact.firstName ?? "") \(contact.lastName ?? "")")
+                Text("\(firstName) \(lastName)")
                     .font(AppFonts.headline)
                     .foregroundColor(AppColors.textPrimary)
                 

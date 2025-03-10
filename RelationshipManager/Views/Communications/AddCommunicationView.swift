@@ -63,7 +63,7 @@ struct AddCommunicationView: View {
                     HStack {
                         AvatarView(
                             imageData: contact.profileImageData,
-                            initials: "\(contact.firstName.prefix(1))\(contact.lastName.prefix(1))",
+                            initials: "\((contact.firstName ?? "").prefix(1))\((contact.lastName ?? "").prefix(1))",
                             size: 40,
                             backgroundColor: contact.category == AppConstants.Category.business.rawValue ? AppColors.businessCategory : AppColors.privateCategory
                         )
@@ -85,7 +85,8 @@ struct AddCommunicationView: View {
                         
                         Spacer()
                         
-                        CategoryBadgeView(category: contact.category)
+                        Text("\(contact.firstName ?? "") \(contact.lastName ?? "")")
+                            .font(AppFonts.headline)
                     }
                 }
             }

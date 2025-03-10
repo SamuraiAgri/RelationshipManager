@@ -33,10 +33,24 @@ class CalendarManager {
         }
         
         let ekEvent = EKEvent(eventStore: eventStore)
-        ekEvent.title = event.title
+        ekEvent.title = event.title ?? "無題のイベント"
         ekEvent.notes = event.details
-        ekEvent.startDate = event.startDate
-        ekEvent.endDate = event.endDate ?? event.startDate.addingTimeInterval(3600) // デフォルトで1時間
+        
+        // startDateがnilの場合は現在時刻を使用
+        guard let startDate = event.startDate else {
+            completion(false, "イベントの開始時間が設定されていません")
+            return
+        }
+        
+        ekEvent.startDate = startDate
+        
+        // endDateがnilの場合は、startDateから1時間後を使用
+        if let endDate = event.endDate {
+            ekEvent.endDate = endDate
+        } else {
+            ekEvent.endDate = startDate.addingTimeInterval(3600) // デフォルトで1時間
+        }
+        
         ekEvent.isAllDay = event.isAllDay
         
         if let locationString = event.location, !locationString.isEmpty {
