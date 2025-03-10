@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct ContactDetailView: View {
@@ -53,7 +52,7 @@ struct ContactDetailView: View {
                         .font(AppFonts.title2)
                         .padding(.top, 8)
                     
-                    CategoryBadgeView(category: contact.category)
+                    CategoryBadgeView(category: contact.category ?? "")
                         .padding(.top, 4)
                     
                     // 連絡先ボタン
@@ -328,7 +327,7 @@ struct ContactDetailView: View {
             .padding(.vertical)
         }
         .background(AppColors.background.ignoresSafeArea())
-        .navigationTitle("\(contact.firstName) \(contact.lastName)")
+        .navigationTitle("\(contact.firstName ?? "") \(contact.lastName ?? "")")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -434,16 +433,6 @@ struct EditContactView: View {
                     }
                 }
         }
-    }
-}
-
-// イベント一覧画面（省略版）
-struct EventListView: View {
-    var contact: ContactEntity
-    
-    var body: some View {
-        Text("\(contact.fullName)のイベント一覧")
-            .navigationTitle("予定")
     }
 }
 

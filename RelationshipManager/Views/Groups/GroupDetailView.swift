@@ -34,7 +34,7 @@ struct GroupDetailView: View {
             VStack {
                 ZStack {
                     Circle()
-                        .fill(group.category == AppConstants.Category.business.rawValue ? AppColors.businessCategory : AppColors.privateCategory)
+                        .fill(group.categoryColor)
                         .frame(width: 80, height: 80)
                     
                     Image(systemName: "person.3.fill")
@@ -50,7 +50,7 @@ struct GroupDetailView: View {
                 CategoryBadgeView(category: group.category ?? "")
                     .padding(.top, 4)
                 
-                if let description = group.descriptionText, !description.isEmpty {
+                if let description = group.groupDescription, !description.isEmpty {
                     Text(description)
                         .font(AppFonts.body)
                         .foregroundColor(AppColors.textSecondary)
@@ -279,6 +279,33 @@ struct DetailEventsTab: View {
                 }
                 .listStyle(PlainListStyle())
             }
+        }
+    }
+}
+
+// 編集用ビュー（仮実装）
+struct EditGroupView: View {
+    @Environment(\.presentationMode) private var presentationMode
+    var group: GroupEntity
+    
+    var body: some View {
+        NavigationView {
+            Text("グループ編集画面")
+                .navigationTitle("グループを編集")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("キャンセル") {
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                    }
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("保存") {
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                    }
+                }
         }
     }
 }

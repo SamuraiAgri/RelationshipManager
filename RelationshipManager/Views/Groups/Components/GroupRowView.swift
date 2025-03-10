@@ -9,7 +9,7 @@ struct GroupRowView: View {
             // グループアイコン
             ZStack {
                 Circle()
-                    .fill(group.category == AppConstants.Category.business.rawValue ? AppColors.businessCategory : AppColors.privateCategory)
+                    .fill(group.categoryColor)
                     .frame(width: 50, height: 50)
                 
                 Image(systemName: "person.3.fill")
@@ -32,7 +32,7 @@ struct GroupRowView: View {
                         .font(AppFonts.bodySmall)
                         .foregroundColor(AppColors.textSecondary)
                     
-                    if let description = group.descriptionText, !description.isEmpty {
+                    if let description = group.groupDescription, !description.isEmpty {
                         Text("・")
                             .foregroundColor(AppColors.textTertiary)
                         

@@ -19,7 +19,7 @@ struct EventListView: View {
                 contact: contact
             ))
         } else if let group = group {
-            self.title = "\(group.name)の予定"
+            self.title = "\(group.name ?? "")の予定"
             _eventViewModel = StateObject(wrappedValue: EventViewModel(
                 context: PersistenceController.shared.container.viewContext,
                 group: group
