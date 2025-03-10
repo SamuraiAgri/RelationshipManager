@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct AvatarView: View {
@@ -7,7 +6,7 @@ struct AvatarView: View {
     var size: CGFloat
     var backgroundColor: Color
     
-    init(imageData: Data?, initials: String, size: CGFloat = 40, backgroundColor: Color = AppColors.primary) {
+    init(imageData: Data? = nil, initials: String, size: CGFloat = 40, backgroundColor: Color = AppColors.primary) {
         self.imageData = imageData
         self.initials = initials
         self.size = size
@@ -38,17 +37,5 @@ struct AvatarView: View {
                     .foregroundColor(.white)
             }
         }
-    }
-}
-
-struct AvatarView_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack(spacing: 20) {
-            AvatarView(imageData: nil, initials: "AB", size: 60, backgroundColor: AppColors.primary)
-            AvatarView(imageData: nil, initials: "CD", size: 60, backgroundColor: AppColors.businessCategory)
-            AvatarView(imageData: nil, initials: "EF", size: 60, backgroundColor: AppColors.privateCategory)
-        }
-        .padding()
-        .previewLayout(.sizeThatFits)
     }
 }

@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct CategoryBadgeView: View {
@@ -29,17 +28,5 @@ struct CategoryBadgeView: View {
         } else {
             return AppColors.privateCategory
         }
-    }
-}
-
-struct CategoryBadgeView_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack(spacing: 20) {
-            CategoryBadgeView(category: AppConstants.Category.business.rawValue)
-            CategoryBadgeView(category: AppConstants.Category.private.rawValue)
-            CategoryBadgeView(category: AppConstants.Category.business.rawValue, fontSize: 16)
-        }
-        .padding()
-        .previewLayout(.sizeThatFits)
     }
 }

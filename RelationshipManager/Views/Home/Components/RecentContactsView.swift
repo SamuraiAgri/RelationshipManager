@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct RecentContactsView: View {
@@ -27,7 +26,7 @@ struct RecentContactsView: View {
                                 VStack {
                                     AvatarView(
                                         imageData: contact.profileImageData,
-                                        initials: contact.initials,
+                                        initials: "\((contact.firstName ?? "").prefix(1))\((contact.lastName ?? "").prefix(1))",
                                         size: 60,
                                         backgroundColor: contact.category == AppConstants.Category.business.rawValue ?
                                             AppColors.businessCategory : AppColors.privateCategory
@@ -39,7 +38,7 @@ struct RecentContactsView: View {
                                         .lineLimit(1)
                                         .frame(width: 100)
                                     
-                                    CategoryBadgeView(category: contact.category)
+                                    CategoryBadgeView(category: contact.category ?? "")
                                 }
                                 .frame(width: 100)
                                 .padding(.vertical, 5)
@@ -55,16 +54,5 @@ struct RecentContactsView: View {
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         .padding(.horizontal)
-    }
-}
-
-struct RecentContactsView_Previews: PreviewProvider {
-    static var previews: some View {
-        let previewContext = PersistenceController.preview.container.viewContext
-        let contacts = previewContext.registeredObjects.compactMap { $0 as? ContactEntity }
-        
-        return RecentContactsView(contacts: contacts)
-            .previewLayout(.sizeThatFits)
-            .padding(.vertical)
     }
 }

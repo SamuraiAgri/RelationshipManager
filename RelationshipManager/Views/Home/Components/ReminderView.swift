@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct ReminderView: View {
@@ -41,7 +40,7 @@ struct ReminderView: View {
                     NavigationLink(destination: EventDetailView(event: event)) {
                         HStack {
                             VStack(alignment: .leading) {
-                                Text(event.title)
+                                Text(event.title ?? "")
                                     .font(AppFonts.headline)
                                     .foregroundColor(AppColors.textPrimary)
                                 
@@ -75,21 +74,5 @@ struct ReminderView: View {
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         .padding(.horizontal)
-    }
-}
-
-struct ReminderView_Previews: PreviewProvider {
-    static var previews: some View {
-        let previewContext = PersistenceController.preview.container.viewContext
-        let event = EventEntity(context: previewContext)
-        event.id = UUID()
-        event.title = "プロジェクトミーティング"
-        event.details = "第3四半期のレビュー"
-        event.startDate = Date()
-        event.isAllDay = false
-        
-        return ReminderView(count: 1, events: [event])
-            .previewLayout(.sizeThatFits)
-            .padding(.vertical)
     }
 }

@@ -1,4 +1,3 @@
-
 import Foundation
 import CoreData
 import SwiftUI
@@ -50,13 +49,13 @@ class EventViewModel: ObservableObject {
         filteredEvents = events.filter { event in
             // 選択された日付でフィルタリング
             let calendar = Calendar.current
-            if !calendar.isDate(event.startDate, inSameDayAs: selectedDate) {
+            if let eventStartDate = event.startDate, !calendar.isDate(eventStartDate, inSameDayAs: selectedDate) {
                 return false
             }
             
             // 検索テキストでフィルタリング
             if !searchText.isEmpty {
-                let searchableText = "\(event.title) \(event.details ?? "")"
+                let searchableText = "\(event.title ?? "") \(event.details ?? "")"
                 return searchableText.lowercased().contains(searchText.lowercased())
             }
             
@@ -70,7 +69,8 @@ class EventViewModel: ObservableObject {
         let oneMonthLater = Calendar.current.date(byAdding: .month, value: 1, to: today)!
         
         upcomingEvents = events.filter { event in
-            return event.startDate >= today && event.startDate <= oneMonthLater
+            guard let startDate = event.startDate else { return false }
+            return startDate >= today && startDate <= oneMonthLater
         }
     }
     
@@ -86,12 +86,11 @@ class EventViewModel: ObservableObject {
         filterEvents()
     }
     
-    // EventViewModelに追加するメソッド
+    // 指定した日付のイベントを取得
     func getEventsForDay(date: Date) -> [EventEntity] {
-        let calendar = Calendar.current
         return events.filter { event in
             guard let eventDate = event.startDate else { return false }
-            return calendar.isDate(eventDate, inSameDayAs: date)
+            return Calendar.current.isDate(eventDate, inSameDayAs: date)
         }
     }
     
@@ -221,7 +220,8 @@ class EventViewModel: ObservableObject {
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
         
         return events.filter { event in
-            return event.startDate >= today && event.startDate < tomorrow
+            guard let startDate = event.startDate else { return false }
+            return startDate >= today && startDate < tomorrow
         }
     }
     
@@ -237,7 +237,8 @@ class EventViewModel: ObservableObject {
         let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek)!
         
         return events.filter { event in
-            return event.startDate >= startOfWeek && event.startDate < endOfWeek
+            guard let startDate = event.startDate else { return false }
+            return startDate >= startOfWeek && startDate < endOfWeek
         }
     }
     
@@ -249,14 +250,16 @@ class EventViewModel: ObservableObject {
         let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
         
         return events.filter { event in
-            return event.startDate >= startOfMonth && event.startDate <= endOfMonth
+            guard let startDate = event.startDate else { return false }
+            return startDate >= startOfMonth && startDate <= endOfMonth
         }
     }
     
     // 日付に基づいてグループ化されたイベントを取得
     func getGroupedEvents() -> [Date: [EventEntity]] {
         let groupedEvents = Dictionary(grouping: events) { event in
-            return Calendar.current.startOfDay(for: event.startDate)
+            guard let startDate = event.startDate else { return Date() }
+            return Calendar.current.startOfDay(for: startDate)
         }
         return groupedEvents
     }

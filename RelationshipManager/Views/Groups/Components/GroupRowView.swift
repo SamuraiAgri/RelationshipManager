@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct GroupRowView: View {
@@ -10,7 +9,7 @@ struct GroupRowView: View {
             // グループアイコン
             ZStack {
                 Circle()
-                    .fill(group.categoryColor)
+                    .fill(group.category == AppConstants.Category.business.rawValue ? AppColors.businessCategory : AppColors.privateCategory)
                     .frame(width: 50, height: 50)
                 
                 Image(systemName: "person.3.fill")
@@ -20,7 +19,7 @@ struct GroupRowView: View {
             
             // グループ情報
             VStack(alignment: .leading, spacing: 4) {
-                Text(group.name)
+                Text(group.name ?? "")
                     .font(AppFonts.headline)
                     .foregroundColor(AppColors.textPrimary)
                 
@@ -33,7 +32,7 @@ struct GroupRowView: View {
                         .font(AppFonts.bodySmall)
                         .foregroundColor(AppColors.textSecondary)
                     
-                    if let description = group.description, !description.isEmpty {
+                    if let description = group.descriptionText, !description.isEmpty {
                         Text("・")
                             .foregroundColor(AppColors.textTertiary)
                         
@@ -47,22 +46,11 @@ struct GroupRowView: View {
             
             Spacer()
             
-            CategoryBadgeView(category: group.category)
+            CategoryBadgeView(category: group.category ?? "")
         }
         .padding(.vertical, 8)
         .onAppear {
             viewModel.fetchGroups()
         }
-    }
-}
-
-struct GroupRowView_Previews: PreviewProvider {
-    static var previews: some View {
-        let previewContext = PersistenceController.preview.container.viewContext
-        let group = previewContext.registeredObjects.first { $0 is GroupEntity } as! GroupEntity
-        
-        return GroupRowView(group: group)
-            .previewLayout(.sizeThatFits)
-            .padding()
     }
 }

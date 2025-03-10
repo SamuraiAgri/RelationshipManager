@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct HomeView: View {
@@ -34,12 +33,12 @@ struct HomeView: View {
                                             VStack {
                                                 AvatarView(
                                                     imageData: contact.profileImageData,
-                                                    initials: "\(contact.firstName.prefix(1))\(contact.lastName.prefix(1))",
+                                                    initials: "\((contact.firstName ?? "").prefix(1))\((contact.lastName ?? "").prefix(1))",
                                                     size: 60,
                                                     backgroundColor: contact.category == AppConstants.Category.business.rawValue ? AppColors.businessCategory : AppColors.privateCategory
                                                 )
                                                 
-                                                Text("\(contact.firstName) \(contact.lastName)")
+                                                Text("\(contact.firstName ?? "") \(contact.lastName ?? "")")
                                                     .font(AppFonts.subheadline)
                                                     .foregroundColor(AppColors.textPrimary)
                                                 
@@ -87,12 +86,5 @@ struct HomeView: View {
         .onAppear {
             viewModel.fetchData()
         }
-    }
-}
-
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView()
-            .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
 }

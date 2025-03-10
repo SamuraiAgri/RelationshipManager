@@ -1,5 +1,3 @@
-
-// CategoryFilterView.swift
 import SwiftUI
 
 struct CategoryFilterView: View {
@@ -48,8 +46,4 @@ struct CategoryFilterButton: View {
                 .cornerRadius(20)
         }
     }
-}
-
-#Preview {
-    CategoryFilterView(selectedCategory: .constant(nil))
 }

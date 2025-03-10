@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct RelationshipMapView: View {
@@ -25,7 +24,7 @@ struct RelationshipMapView: View {
                     .fill(group.categoryColor)
                     .frame(width: 80, height: 80)
                     .overlay(
-                        Text(group.name.prefix(2))
+                        Text((group.name ?? "").prefix(2))
                             .font(AppFonts.title3)
                             .foregroundColor(.white)
                     )
@@ -85,16 +84,5 @@ struct Line: Shape {
         path.move(to: CGPoint(x: rect.midX + from.x, y: rect.midY + from.y))
         path.addLine(to: CGPoint(x: rect.midX + to.x, y: rect.midY + to.y))
         return path
-    }
-}
-
-struct RelationshipMapView_Previews: PreviewProvider {
-    static var previews: some View {
-        let previewContext = PersistenceController.preview.container.viewContext
-        let group = previewContext.registeredObjects.first { $0 is GroupEntity } as! GroupEntity
-        
-        return RelationshipMapView(group: group)
-            .previewLayout(.sizeThatFits)
-            .frame(height: 400)
     }
 }

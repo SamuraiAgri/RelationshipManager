@@ -1,4 +1,3 @@
-
 import SwiftUI
 import UIKit
 
@@ -163,9 +162,4 @@ struct AddContactView: View {
         
         presentationMode.wrappedValue.dismiss()
     }
-}
-
-#Preview {
-    AddContactView()
-        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }

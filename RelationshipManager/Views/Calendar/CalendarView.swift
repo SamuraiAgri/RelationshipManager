@@ -235,13 +235,3 @@ struct DayCalendarView: View {
             .padding()
     }
 }
-
-// EventViewModel の拡張（一時的なもの）
-extension EventViewModel {
-    func getEventsForDay(date: Date) -> [EventEntity] {
-        return events.filter { event in
-            guard let eventDate = event.startDate else { return false }
-            return Calendar.current.isDate(eventDate, inSameDayAs: date)
-        }
-    }
-}
