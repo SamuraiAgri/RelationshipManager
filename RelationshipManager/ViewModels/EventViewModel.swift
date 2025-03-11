@@ -9,6 +9,9 @@ class EventViewModel: ObservableObject {
     @Published var selectedDate: Date = Date()
     @Published var searchText: String = ""
     
+    // 誕生日イベントを保存する配列
+    @Published var birthdayEvents: [BirthdayEvent] = []
+    
     private var viewContext: NSManagedObjectContext
     private var contact: ContactEntity?
     private var group: GroupEntity?
@@ -18,6 +21,7 @@ class EventViewModel: ObservableObject {
         self.contact = contact
         self.group = group
         fetchEvents()
+        fetchBirthdayEvents() // 誕生日イベントも取得
     }
     
     // すべてのイベントを取得
@@ -41,6 +45,100 @@ class EventViewModel: ObservableObject {
         } catch {
             print("イベントの取得に失敗しました: \(error.localizedDescription)")
         }
+    }
+    
+    // 今後のイベントを更新
+    func updateUpcomingEvents() {
+        let today = Calendar.current.startOfDay(for: Date())
+        let oneMonthLater = Calendar.current.date(byAdding: .month, value: 1, to: today)!
+        
+        upcomingEvents = events.filter { event in
+            guard let startDate = event.startDate else { return false }
+            return startDate >= today && startDate <= oneMonthLater
+        }
+    }
+    
+    // 全連絡先から誕生日情報を取得しイベントとして扱う
+    func fetchBirthdayEvents() {
+        let request = NSFetchRequest<ContactEntity>(entityName: "ContactEntity")
+        request.predicate = NSPredicate(format: "birthday != nil")
+        
+        do {
+            let contacts = try viewContext.fetch(request)
+            birthdayEvents = []
+            
+            for contact in contacts {
+                if let birthday = contact.birthday {
+                    // 今年の誕生日を計算
+                    let birthdayThisYear = calculateBirthdayForCurrentYear(originalDate: birthday)
+                    
+                    // 誕生日イベントを作成
+                    let birthdayEvent = BirthdayEvent(
+                        id: contact.id ?? UUID(),
+                        contact: contact,
+                        date: birthdayThisYear,
+                        originalBirthDate: birthday
+                    )
+                    birthdayEvents.append(birthdayEvent)
+                }
+            }
+        } catch {
+            print("誕生日イベントの取得に失敗しました: \(error.localizedDescription)")
+        }
+    }
+    
+    // 特定の日付の全イベント（通常イベント + 誕生日）を取得
+    func getEventsForDay(date: Date) -> [EventEntity] {
+        let regularEvents = events.filter { event in
+            guard let eventDate = event.startDate else { return false }
+            return Calendar.current.isDate(eventDate, inSameDayAs: date)
+        }
+        
+        // 誕生日イベントは変換しない（表示用のみの使用）
+        return regularEvents
+    }
+    
+    // 特定の日付の誕生日イベントを取得
+    func getBirthdaysForDay(date: Date) -> [BirthdayEvent] {
+        return birthdayEvents.filter { birthdayEvent in
+            Calendar.current.isDate(birthdayEvent.date, inSameDayAs: date)
+        }
+    }
+    
+    // 特定の日付の全てのイベント情報（カレンダー表示用）
+    func getAllEventsForDay(date: Date) -> (regularEvents: [EventEntity], birthdayEvents: [BirthdayEvent]) {
+        let regular = getEventsForDay(date: date)
+        let birthdays = getBirthdaysForDay(date: date)
+        return (regular, birthdays)
+    }
+    
+    // 今年の誕生日日付を計算
+    private func calculateBirthdayForCurrentYear(originalDate: Date) -> Date {
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        
+        // 元の誕生日から月と日を取得
+        let month = calendar.component(.month, from: originalDate)
+        let day = calendar.component(.day, from: originalDate)
+        
+        // 今年の日付を作成
+        var dateComponents = DateComponents()
+        dateComponents.year = currentYear
+        dateComponents.month = month
+        dateComponents.day = day
+        
+        // 今年の誕生日
+        if let thisYearBirthday = calendar.date(from: dateComponents) {
+            // 今日より前なら来年の誕生日を返す
+            if thisYearBirthday < Date() {
+                dateComponents.year = currentYear + 1
+                return calendar.date(from: dateComponents) ?? thisYearBirthday
+            }
+            return thisYearBirthday
+        }
+        
+        // 日付の変換に失敗した場合は元の日付を返す（通常発生しない）
+        return originalDate
     }
     
     // イベントのフィルタリング
@@ -67,17 +165,6 @@ class EventViewModel: ObservableObject {
         }
     }
     
-    // 今後のイベントを更新
-    func updateUpcomingEvents() {
-        let today = Calendar.current.startOfDay(for: Date())
-        let oneMonthLater = Calendar.current.date(byAdding: .month, value: 1, to: today)!
-        
-        upcomingEvents = events.filter { event in
-            guard let startDate = event.startDate else { return false }
-            return startDate >= today && startDate <= oneMonthLater
-        }
-    }
-    
     // 選択日を設定
     func setSelectedDate(_ date: Date) {
         selectedDate = date
@@ -91,7 +178,7 @@ class EventViewModel: ObservableObject {
     }
     
     // 指定した日付のイベントを取得
-    func getEventsForDay(date: Date) -> [EventEntity] {
+    func getEventsForDayOriginal(date: Date) -> [EventEntity] {
         return events.filter { event in
             guard let eventDate = event.startDate else { return false }
             return Calendar.current.isDate(eventDate, inSameDayAs: date)
@@ -266,5 +353,27 @@ class EventViewModel: ObservableObject {
             return Calendar.current.startOfDay(for: startDate)
         }
         return groupedEvents
+    }
+}
+
+// 誕生日イベントを表すモデル
+struct BirthdayEvent: Identifiable {
+    let id: UUID
+    let contact: ContactEntity
+    let date: Date
+    let originalBirthDate: Date
+    
+    var age: Int {
+        let calendar = Calendar.current
+        let ageComponents = calendar.dateComponents([.year], from: originalBirthDate, to: Date())
+        return ageComponents.year ?? 0
+    }
+    
+    var title: String {
+        return "\(contact.fullName)の誕生日"
+    }
+    
+    var details: String {
+        return "\(age)歳になります"
     }
 }
