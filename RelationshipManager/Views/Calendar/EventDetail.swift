@@ -22,216 +22,21 @@ struct EventDetailView: View {
         ScrollView {
             VStack(spacing: 20) {
                 // イベントヘッダー
-                VStack(spacing: 10) {
-                    Text(event.title ?? "無題")
-                        .font(AppFonts.title2)
-                        .multilineTextAlignment(.center)
-                        .padding(.top)
-                    
-                    HStack {
-                        Image(systemName: "calendar")
-                            .foregroundColor(AppColors.textTertiary)
-                        
-                        Text(event.formattedStartDate)
-                            .font(AppFonts.headline)
-                    }
-                    
-                    HStack {
-                        Image(systemName: "clock")
-                            .foregroundColor(AppColors.textTertiary)
-                        
-                        Text(event.formattedStartTime)
-                            .font(AppFonts.body)
-                        
-                        if !event.isAllDay {
-                            Text("(\(event.durationString))")
-                                .font(AppFonts.bodySmall)
-                                .foregroundColor(AppColors.textSecondary)
-                        }
-                    }
-                    
-                    if let location = event.location, !location.isEmpty {
-                        HStack {
-                            Image(systemName: "mappin.and.ellipse")
-                                .foregroundColor(AppColors.textTertiary)
-                            
-                            Text(location)
-                                .font(AppFonts.body)
-                        }
-                    }
-                    
-                    if event.reminder {
-                        HStack {
-                            Image(systemName: "bell.fill")
-                                .foregroundColor(AppColors.accent)
-                            
-                            if let reminderDate = event.reminderDate {
-                                Text("通知: \(reminderDate.formattedDateTime())")
-                                    .font(AppFonts.body)
-                            } else {
-                                Text("通知: あり")
-                                    .font(AppFonts.body)
-                            }
-                        }
-                    }
-                }
-                .padding(.bottom)
-                .frame(maxWidth: .infinity)
-                .background(AppColors.cardBackground)
-                .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                .padding(.horizontal)
+                eventHeaderSection
                 
                 // 詳細情報
-                if let details = event.details, !details.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("詳細")
-                            .font(AppFonts.title3)
-                        
-                        Text(details)
-                            .font(AppFonts.body)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(AppColors.cardBackground)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                    .padding(.horizontal)
-                }
+                detailsSection
                 
                 // 参加者
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("参加者")
-                        .font(AppFonts.title3)
-                    
-                    if event.contactsArray.isEmpty {
-                        Text("参加者はいません")
-                            .font(AppFonts.body)
-                            .foregroundColor(AppColors.textSecondary)
-                            .padding(.vertical)
-                    } else {
-                        ForEach(event.contactsArray) { contact in
-                            NavigationLink(destination: ContactDetailView(contact: contact)) {
-                                HStack {
-                                    AvatarView(
-                                        imageData: contact.profileImageData,
-                                        initials: contact.initials,
-                                        size: 40,
-                                        backgroundColor: contact.category == AppConstants.Category.business.rawValue ?
-                                            AppColors.businessCategory : AppColors.privateCategory
-                                    )
-                                    
-                                    Text(contact.fullName)
-                                        .font(AppFonts.body)
-                                        .foregroundColor(AppColors.textPrimary)
-                                    
-                                    Spacer()
-                                    
-                                    CategoryBadgeView(category: contact.category)
-                                }
-                            }
-                            
-                            if contact.id != event.contactsArray.last?.id {
-                                Divider()
-                            }
-                        }
-                    }
-                }
-                .padding()
-                .background(AppColors.cardBackground)
-                .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                .padding(.horizontal)
+                participantsSection
                 
                 // グループ情報（グループがある場合）
                 if let group = event.group {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("グループ")
-                            .font(AppFonts.title3)
-                        
-                        NavigationLink(destination: GroupDetailView(group: group)) {
-                            HStack {
-                                ZStack {
-                                    Circle()
-                                        .fill(group.categoryColor)
-                                        .frame(width: 40, height: 40)
-                                    
-                                    Image(systemName: "person.3.fill")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(.white)
-                                }
-                                
-                                Text(group.name)
-                                    .font(AppFonts.body)
-                                    .foregroundColor(AppColors.textPrimary)
-                                
-                                Spacer()
-                                
-                                CategoryBadgeView(category: group.category)
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(AppColors.cardBackground)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                    .padding(.horizontal)
+                    groupInfoSection(group: group)
                 }
                 
                 // アクションボタン
-                HStack(spacing: 20) {
-                    if let startDate = event.startDate,
-                       let calendar = Calendar.current.date(byAdding: .minute, value: -10, to: startDate),
-                       calendar > Date() {
-                        Button(action: {
-                            addToCalendar()
-                        }) {
-                            VStack {
-                                Image(systemName: "calendar.badge.plus")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(AppColors.primary)
-                                
-                                Text("カレンダーに追加")
-                                    .font(AppFonts.caption1)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    
-                    Button(action: {
-                        showingEditSheet = true
-                    }) {
-                        VStack {
-                            Image(systemName: "pencil")
-                                .font(.system(size: 24))
-                                .foregroundColor(AppColors.accent)
-                            
-                            Text("編集")
-                                .font(AppFonts.caption1)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    
-                    Button(action: {
-                        showingDeleteAlert = true
-                    }) {
-                        VStack {
-                            Image(systemName: "trash")
-                                .font(.system(size: 24))
-                                .foregroundColor(AppColors.error)
-                            
-                            Text("削除")
-                                .font(AppFonts.caption1)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .padding()
-                .background(AppColors.cardBackground)
-                .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                .padding(.horizontal)
+                actionButtonsSection
             }
             .padding(.vertical)
         }
@@ -243,15 +48,279 @@ struct EventDetailView: View {
                 .environment(\.managedObjectContext, viewContext)
         }
         .alert(isPresented: $showingDeleteAlert) {
-            Alert(
-                title: Text("予定を削除"),
-                message: Text("この予定を削除してもよろしいですか？"),
-                primaryButton: .destructive(Text("削除")) {
-                    deleteEvent()
-                },
-                secondaryButton: .cancel(Text("キャンセル"))
-            )
+            deleteConfirmationAlert
         }
+    }
+    
+    // イベントヘッダーセクション
+    private var eventHeaderSection: some View {
+        VStack(spacing: 10) {
+            Text(event.title ?? "無題")
+                .font(AppFonts.title2)
+                .multilineTextAlignment(.center)
+                .padding(.top)
+            
+            HStack {
+                Image(systemName: "calendar")
+                    .foregroundColor(AppColors.textTertiary)
+                
+                Text(event.formattedStartDate)
+                    .font(AppFonts.headline)
+            }
+            
+            HStack {
+                Image(systemName: "clock")
+                    .foregroundColor(AppColors.textTertiary)
+                
+                Text(event.formattedStartTime)
+                    .font(AppFonts.body)
+                
+                if !event.isAllDay {
+                    Text("(\(event.durationString))")
+                        .font(AppFonts.bodySmall)
+                        .foregroundColor(AppColors.textSecondary)
+                }
+            }
+            
+            if let location = event.location, !location.isEmpty {
+                HStack {
+                    Image(systemName: "mappin.and.ellipse")
+                        .foregroundColor(AppColors.textTertiary)
+                    
+                    Text(location)
+                        .font(AppFonts.body)
+                }
+            }
+            
+            if event.reminder {
+                reminderInfoView
+            }
+        }
+        .padding(.bottom)
+        .frame(maxWidth: .infinity)
+        .background(AppColors.cardBackground)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .padding(.horizontal)
+    }
+    
+    // リマインダー情報
+    private var reminderInfoView: some View {
+        HStack {
+            Image(systemName: "bell.fill")
+                .foregroundColor(AppColors.accent)
+            
+            if let reminderDate = event.reminderDate {
+                Text("通知: \(reminderDate.formattedDateTime())")
+                    .font(AppFonts.body)
+            } else {
+                Text("通知: あり")
+                    .font(AppFonts.body)
+            }
+        }
+    }
+    
+    // 詳細情報セクション
+    private var detailsSection: some View {
+        Group {
+            if let details = event.details, !details.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("詳細")
+                        .font(AppFonts.title3)
+                    
+                    Text(details)
+                        .font(AppFonts.body)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(AppColors.cardBackground)
+                .cornerRadius(12)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .padding(.horizontal)
+            }
+        }
+    }
+    
+    // 参加者セクション
+    private var participantsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("参加者")
+                .font(AppFonts.title3)
+            
+            if event.contactsArray.isEmpty {
+                Text("参加者はいません")
+                    .font(AppFonts.body)
+                    .foregroundColor(AppColors.textSecondary)
+                    .padding(.vertical)
+            } else {
+                participantsList
+            }
+        }
+        .padding()
+        .background(AppColors.cardBackground)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .padding(.horizontal)
+    }
+    
+    // 参加者リスト
+    private var participantsList: some View {
+        ForEach(event.contactsArray) { contact in
+            NavigationLink(destination: ContactDetailView(contact: contact)) {
+                participantRow(contact: contact)
+            }
+            .padding(.vertical, 4)
+            
+            if contact.id != event.contactsArray.last?.id {
+                Divider()
+            }
+        }
+    }
+    
+    // 参加者の行
+    private func participantRow(contact: ContactEntity) -> some View {
+        HStack {
+            AvatarView(
+                imageData: contact.profileImageData,
+                initials: contact.initials,
+                size: 40,
+                backgroundColor: contact.category == AppConstants.Category.business.rawValue ?
+                    AppColors.businessCategory : AppColors.privateCategory
+            )
+            
+            Text(contact.fullName)
+                .font(AppFonts.body)
+                .foregroundColor(AppColors.textPrimary)
+            
+            Spacer()
+            
+            CategoryBadgeView(category: contact.category ?? "")
+        }
+    }
+    
+    // グループ情報セクション
+    private func groupInfoSection(group: GroupEntity) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("グループ")
+                .font(AppFonts.title3)
+            
+            NavigationLink(destination: GroupDetailView(group: group)) {
+                groupRow(group: group)
+            }
+        }
+        .padding()
+        .background(AppColors.cardBackground)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .padding(.horizontal)
+    }
+    
+    // グループの行
+    private func groupRow(group: GroupEntity) -> some View {
+        HStack {
+            ZStack {
+                Circle()
+                    .fill(group.categoryColor)
+                    .frame(width: 40, height: 40)
+                
+                Image(systemName: "person.3.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(.white)
+            }
+            
+            Text(group.name ?? "")
+                .font(AppFonts.body)
+                .foregroundColor(AppColors.textPrimary)
+            
+            Spacer()
+            
+            CategoryBadgeView(category: group.category ?? "")
+        }
+    }
+    
+    // アクションボタンセクション
+    private var actionButtonsSection: some View {
+        HStack(spacing: 20) {
+            // カレンダーに追加ボタン (イベントが未来の場合のみ表示)
+            calendarAddButton
+            
+            // 編集ボタン
+            Button(action: {
+                showingEditSheet = true
+            }) {
+                actionButtonContent(
+                    imageName: "pencil",
+                    color: AppColors.accent,
+                    text: "編集"
+                )
+            }
+            .frame(maxWidth: .infinity)
+            
+            // 削除ボタン
+            Button(action: {
+                showingDeleteAlert = true
+            }) {
+                actionButtonContent(
+                    imageName: "trash",
+                    color: AppColors.error,
+                    text: "削除"
+                )
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .padding()
+        .background(AppColors.cardBackground)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .padding(.horizontal)
+    }
+    
+    // カレンダーに追加ボタン
+    private var calendarAddButton: some View {
+        Group {
+            if let startDate = event.startDate,
+               let calendar = Calendar.current.date(byAdding: .minute, value: -10, to: startDate),
+               calendar > Date() {
+                Button(action: {
+                    addToCalendar()
+                }) {
+                    actionButtonContent(
+                        imageName: "calendar.badge.plus",
+                        color: AppColors.primary,
+                        text: "カレンダーに追加"
+                    )
+                }
+                .frame(maxWidth: .infinity)
+            } else {
+                Spacer()
+                    .frame(maxWidth: .infinity)
+            }
+        }
+    }
+    
+    // アクションボタンの共通コンテンツ
+    private func actionButtonContent(imageName: String, color: Color, text: String) -> some View {
+        VStack {
+            Image(systemName: imageName)
+                .font(.system(size: 24))
+                .foregroundColor(color)
+            
+            Text(text)
+                .font(AppFonts.caption1)
+        }
+    }
+    
+    // 削除確認アラート
+    private var deleteConfirmationAlert: Alert {
+        Alert(
+            title: Text("予定を削除"),
+            message: Text("この予定を削除してもよろしいですか？"),
+            primaryButton: .destructive(Text("削除")) {
+                deleteEvent()
+            },
+            secondaryButton: .cancel(Text("キャンセル"))
+        )
     }
     
     // イベントを削除
@@ -274,7 +343,7 @@ struct EventDetailView: View {
     }
 }
 
-// イベント編集画面
+// イベント編集画面も同様に分割
 struct EditEventView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.presentationMode) private var presentationMode
@@ -298,14 +367,38 @@ struct EditEventView: View {
     init(event: EventEntity) {
         self.event = event
         
-        _title = State(initialValue: event.title)
+        _title = State(initialValue: event.title ?? "")
         _details = State(initialValue: event.details ?? "")
-        _startDate = State(initialValue: event.startDate)
-        _endDate = State(initialValue: event.endDate ?? event.startDate.addingTimeInterval(3600))
+        
+        // startDateがnilの場合は現在時刻を使用
+        let defaultDate = Date()
+        _startDate = State(initialValue: event.startDate ?? defaultDate)
+        
+        // endDateがnilの場合はstartDateの1時間後を使用
+        let endDateValue: Date
+        if let eventEndDate = event.endDate {
+            endDateValue = eventEndDate
+        } else if let eventStartDate = event.startDate {
+            endDateValue = eventStartDate.addingTimeInterval(3600)
+        } else {
+            endDateValue = defaultDate.addingTimeInterval(3600)
+        }
+        _endDate = State(initialValue: endDateValue)
+        
         _isAllDay = State(initialValue: event.isAllDay)
         _location = State(initialValue: event.location ?? "")
         _reminder = State(initialValue: event.reminder)
-        _reminderDate = State(initialValue: event.reminderDate ?? event.startDate.addingTimeInterval(-1800))
+        
+        // reminderDateがnilの場合はstartDateの30分前を使用
+        let reminderDateValue: Date
+        if let eventReminderDate = event.reminderDate {
+            reminderDateValue = eventReminderDate
+        } else if let eventStartDate = event.startDate {
+            reminderDateValue = eventStartDate.addingTimeInterval(-1800)
+        } else {
+            reminderDateValue = defaultDate.addingTimeInterval(-1800)
+        }
+        _reminderDate = State(initialValue: reminderDateValue)
         
         // 既存の参加者を取得
         if let contacts = event.contacts as? Set<ContactEntity> {
@@ -316,108 +409,15 @@ struct EditEventView: View {
     var body: some View {
         NavigationView {
             Form {
-                // 基本情報
-                Section(header: Text("基本情報")) {
-                    TextField("タイトル", text: $title)
-                    
-                    ZStack(alignment: .topLeading) {
-                        if details.isEmpty {
-                            Text("詳細")
-                                .foregroundColor(AppColors.textTertiary)
-                                .padding(.top, 8)
-                                .padding(.leading, 4)
-                        }
-                        
-                        TextEditor(text: $details)
-                            .frame(minHeight: 80)
-                    }
-                }
-                
-                // 日時設定
-                Section(header: Text("日時")) {
-                    Toggle("終日", isOn: $isAllDay)
-                    
-                    if isAllDay {
-                        DatePicker("日付", selection: $startDate, displayedComponents: .date)
-                    } else {
-                        DatePicker("開始", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
-                        DatePicker("終了", selection: $endDate, in: startDate..., displayedComponents: [.date, .hourAndMinute])
-                    }
-                }
-                
-                // 場所
-                Section(header: Text("場所")) {
-                    TextField("場所", text: $location)
-                }
-                
-                // リマインダー
-                Section(header: Text("リマインダー")) {
-                    Toggle("リマインダー", isOn: $reminder)
-                    
-                    if reminder {
-                        DatePicker("通知時間", selection: $reminderDate, in: ...startDate, displayedComponents: [.date, .hourAndMinute])
-                    }
-                }
-                
-                // 参加者
-                Section(header: Text("参加者")) {
-                    Button(action: {
-                        showingContactPicker = true
-                    }) {
-                        HStack {
-                            Text(selectedContactIds.isEmpty ? "参加者を追加" : "\(selectedContactIds.count)人の参加者")
-                                .foregroundColor(selectedContactIds.isEmpty ? AppColors.textTertiary : AppColors.textPrimary)
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                    }
-                    
-                    if !selectedContactIds.isEmpty {
-                        ForEach(contactViewModel.contacts.filter { contact in
-                            guard let id = contact.id else { return false }
-                            return selectedContactIds.contains(id)
-                        }) { contact in
-                            HStack {
-                                AvatarView(
-                                    imageData: contact.profileImageData,
-                                    initials: contact.initials,
-                                    size: 40,
-                                    backgroundColor: contact.category == AppConstants.Category.business.rawValue ?
-                                        AppColors.businessCategory : AppColors.privateCategory
-                                )
-                                
-                                Text(contact.fullName)
-                                    .font(AppFonts.body)
-                            }
-                        }
-                    }
-                }
+                basicInfoSection
+                dateTimeSection
+                locationSection
+                reminderSection
+                participantsSection
                 
                 // グループ情報（グループがある場合）
                 if let group = event.group {
-                    Section(header: Text("グループ")) {
-                        HStack {
-                            ZStack {
-                                Circle()
-                                    .fill(group.categoryColor)
-                                    .frame(width: 40, height: 40)
-                                
-                                Image(systemName: "person.3.fill")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.white)
-                            }
-                            
-                            Text(group.name)
-                                .font(AppFonts.body)
-                            
-                            Spacer()
-                            
-                            CategoryBadgeView(category: group.category)
-                        }
-                    }
+                    groupSection(group: group)
                 }
             }
             .navigationTitle("予定を編集")
@@ -442,6 +442,128 @@ struct EditEventView: View {
             }
             .onAppear {
                 contactViewModel.fetchContacts()
+            }
+        }
+    }
+    
+    // 基本情報セクション
+    private var basicInfoSection: some View {
+        Section(header: Text("基本情報")) {
+            TextField("タイトル", text: $title)
+            
+            ZStack(alignment: .topLeading) {
+                if details.isEmpty {
+                    Text("詳細")
+                        .foregroundColor(AppColors.textTertiary)
+                        .padding(.top, 8)
+                        .padding(.leading, 4)
+                }
+                
+                TextEditor(text: $details)
+                    .frame(minHeight: 80)
+            }
+        }
+    }
+    
+    // 日時設定セクション
+    private var dateTimeSection: some View {
+        Section(header: Text("日時")) {
+            Toggle("終日", isOn: $isAllDay)
+            
+            if isAllDay {
+                DatePicker("日付", selection: $startDate, displayedComponents: .date)
+            } else {
+                DatePicker("開始", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+                DatePicker("終了", selection: $endDate, in: startDate..., displayedComponents: [.date, .hourAndMinute])
+            }
+        }
+    }
+    
+    // 場所セクション
+    private var locationSection: some View {
+        Section(header: Text("場所")) {
+            TextField("場所", text: $location)
+        }
+    }
+    
+    // リマインダーセクション
+    private var reminderSection: some View {
+        Section(header: Text("リマインダー")) {
+            Toggle("リマインダー", isOn: $reminder)
+            
+            if reminder {
+                DatePicker("通知時間", selection: $reminderDate, in: ...startDate, displayedComponents: [.date, .hourAndMinute])
+            }
+        }
+    }
+    
+    // 参加者セクション
+    private var participantsSection: some View {
+        Section(header: Text("参加者")) {
+            Button(action: {
+                showingContactPicker = true
+            }) {
+                HStack {
+                    Text(selectedContactIds.isEmpty ? "参加者を追加" : "\(selectedContactIds.count)人の参加者")
+                        .foregroundColor(selectedContactIds.isEmpty ? AppColors.textTertiary : AppColors.textPrimary)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(AppColors.textTertiary)
+                }
+            }
+            
+            selectedParticipantsList
+        }
+    }
+    
+    // 選択された参加者リスト
+    private var selectedParticipantsList: some View {
+        ForEach(contactViewModel.contacts.filter { contact in
+            guard let id = contact.id else { return false }
+            return selectedContactIds.contains(id)
+        }) { contact in
+            participantRow(contact: contact)
+        }
+    }
+    
+    // 参加者の行
+    private func participantRow(contact: ContactEntity) -> some View {
+        HStack {
+            AvatarView(
+                imageData: contact.profileImageData,
+                initials: contact.initials,
+                size: 40,
+                backgroundColor: contact.category == AppConstants.Category.business.rawValue ?
+                    AppColors.businessCategory : AppColors.privateCategory
+            )
+            
+            Text(contact.fullName)
+                .font(AppFonts.body)
+        }
+    }
+    
+    // グループセクション
+    private func groupSection(group: GroupEntity) -> some View {
+        Section(header: Text("グループ")) {
+            HStack {
+                ZStack {
+                    Circle()
+                        .fill(group.categoryColor)
+                        .frame(width: 40, height: 40)
+                    
+                    Image(systemName: "person.3.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.white)
+                }
+                
+                Text(group.name ?? "")
+                    .font(AppFonts.body)
+                
+                Spacer()
+                
+                CategoryBadgeView(category: group.category ?? "")
             }
         }
     }
