@@ -82,31 +82,28 @@ class HomeViewModel: ObservableObject {
     private func fetchTodaysBirthdays() {
         let request = NSFetchRequest<ContactEntity>(entityName: "ContactEntity")
         
-        // 今日の日付に一致する誕生日を持つ連絡先を取得
-        let calendar = Calendar.current
-        let today = Date()
-        
-        // 月と日に基づいて誕生日をフィルタリング
-        let dayFormat = DateFormatter()
-        dayFormat.dateFormat = "dd"
-        let dayString = dayFormat.string(from: today)
-        
-        let monthFormat = DateFormatter()
-        monthFormat.dateFormat = "MM"
-        let monthString = monthFormat.string(from: today)
-        
-        // 文字列比較で月と日を一致させる
-        let predicate = NSPredicate(
-            format: "birthday != nil AND SUBSTRING(birthday, 6, 2) = %@ AND SUBSTRING(birthday, 9, 2) = %@",
-            monthString, dayString
-        )
-        request.predicate = predicate
-        
-        // 名前順でソート
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \ContactEntity.firstName, ascending: true)]
+        // birthday != nilの条件だけを指定して、すべての連絡先を取得
+        request.predicate = NSPredicate(format: "birthday != nil")
         
         do {
-            todaysBirthdays = try viewContext.fetch(request)
+            let contacts = try viewContext.fetch(request)
+            
+            // 現在の日付を取得
+            let calendar = Calendar.current
+            let today = Date()
+            let todayComponents = calendar.dateComponents([.month, .day], from: today)
+            let todayMonth = todayComponents.month!
+            let todayDay = todayComponents.day!
+            
+            // メモリ内でフィルタリング
+            todaysBirthdays = contacts.filter { contact in
+                guard let birthday = contact.birthday else { return false }
+                let birthdayComponents = calendar.dateComponents([.month, .day], from: birthday)
+                let birthdayMonth = birthdayComponents.month!
+                let birthdayDay = birthdayComponents.day!
+                
+                return birthdayMonth == todayMonth && birthdayDay == todayDay
+            }
         } catch {
             print("誕生日の取得に失敗しました: \(error.localizedDescription)")
             todaysBirthdays = [] // エラー時は空配列を設定
